@@ -2,7 +2,7 @@
 console.log('Junk Deal app initialized');
 
 // API Configuration
-const API_BASE_URL = process.env.API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = process.env.API_URL || 'https://katiedayjunk1.github.io/yard-sale-cleanup/';
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
