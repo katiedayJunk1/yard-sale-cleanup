@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const db = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,9 +12,27 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Initialize database on startup
+let dbConnected = false;
+
+(async () => {
+    try {
+        await db.connect();
+        dbConnected = true;
+        console.log('🚀 Database initialized');
+    } catch (error) {
+        console.error('Failed to initialize database:', error);
+        process.exit(1);
+    }
+})();
+
 // Routes
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', message: 'Backend is running' });
+    res.json({ 
+        status: 'OK', 
+        message: 'Backend is running',
+        database: dbConnected ? 'Connected' : 'Disconnected'
+    });
 });
 
 app.get('/api', (req, res) => {
