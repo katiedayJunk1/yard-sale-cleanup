@@ -120,9 +120,8 @@ PORT=3000
 NODE_ENV=development
 
 # Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=junk_deal
+DB_URL=postgresql://postgres:hjCNBrkDZwPouqKxSakmCcmvKtKlyXoy@yamabiko.proxy.rlwy.net:12753/railway
+DB_NAME=User_Data
 
 # Email
 EMAIL_SERVICE=gmail
