@@ -1,0 +1,249 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+    padding-top: 40px;
+}
+
+header h1 {
+    font-size: 3em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+header .tagline {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+main {
+    background: white;
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.hero h2 {
+    font-size: 2em;
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 1.1em;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.features {
+    margin-top: 40px;
+}
+
+.features h3 {
+    color: #667eea;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.features ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.features li {
+    padding: 15px;
+    background: #f8f9ff;
+    border-left: 4px solid #667eea;
+    border-radius: 5px;
+    font-size: 1.05em;
+}
+
+footer {
+    text-align: center;
+    color: white;
+    margin-top: 40px;
+    padding-bottom: 20px;
+    opacity: 0.8;
+}
+
+/* --- additions for deal signup --- */
+
+.card {
+    margin-top: 25px;
+    padding: 22px;
+    border-radius: 12px;
+    background: #f8f9ff;
+}
+
+.muted {
+    color: #666;
+}
+
+.status-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85em;
+    background: #e0e7ff;
+    color: #333;
+}
+
+.badge.on { background: #d1fae5; }
+.badge.fail { background: #fee2e2; }
+.badge.closed { background: #e5e7eb; }
+.badge.open { background: #e0e7ff; }
+
+.progress {
+    width: 100%;
+    height: 14px;
+    background: #e9ecff;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    width: 0%;
+    transition: width 0.4s ease;
+}
+
+.progress-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+    font-size: 0.95em;
+}
+
+.bullets {
+    margin-top: 12px;
+    padding-left: 18px;
+}
+
+.bullets li { margin: 8px 0; }
+
+.form {
+    margin-top: 14px;
+}
+
+.form label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-top: 12px;
+}
+
+.form input {
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d7dcff;
+    font-size: 1em;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row > * { flex: 1; }
+
+.form-msg {
+    margin-top: 12px;
+    color: #b91c1c;
+}
+
+.form-msg.ok {
+    color: #065f46;
+}
+
+.table-wrap { overflow-x: auto; }
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table th, .table td {
+    padding: 10px;
+    border-bottom: 1px solid #eef2ff;
+    text-align: left;
+    font-size: 0.95em;
+}
+
+.table th { color: #4f46e5; background: #eef2ff; }
+
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2em;
+    }
+    
+    main {
+        padding: 20px;
+    }
+    
+    .hero h2 {
+        font-size: 1.5em;
+    }
+}

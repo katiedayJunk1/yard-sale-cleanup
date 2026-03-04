@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Junkluggers - Yard Sale Leftovers Pickup Deal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>The Junkluggers</h1>
+      <p class="tagline">Weekly Yard Sale Leftovers Pickup Deal</p>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h2>$50 pickup (if the group hits the minimum)</h2>
+        <p>
+          Sign up Monday 8:00am → Saturday 9:00pm. If we hit the minimum signups, we'll pick up your leftovers the <strong>following Monday (8:00am–6:00pm)</strong>.
+        </p>
+      </section>
+
+      <section class="card">
+        <h3>This week's status</h3>
+
+        <div class="status-row">
+          <span id="statusBadge" class="badge">Loading…</span>
+          <span id="statusText" class="muted"></span>
+        </div>
+
+        <div class="progress">
+          <div id="progressBar" class="progress-bar" style="width:0%"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="progressNumbers">—</span>
+          <span id="deadlines" class="muted"></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>What's included</h3>
+        <ul class="bullets">
+          <li>Up to <strong>4 cubic yards</strong> (about four washing machines)</li>
+          <li>Small items must be <strong>bundled/boxed/bagged</strong> on the curb</li>
+          <li>Trash must be <strong>clearly labeled</strong></li>
+          <li>Everything assumed <strong>donatable</strong> unless labeled trash</li>
+          <li>Extra items allowed at retail pricing with a <strong>10% discount</strong></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h3>Sign up</h3>
+        <p class="muted" id="signupHelp">Loading signup availability…</p>
+
+        <form id="signupForm" class="form">
+          <div class="form-row">
+            <label>First name
+              <input name="first_name" required />
+            </label>
+            <label>Last name
+              <input name="last_name" required />
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label>Email
+              <input name="email" type="email" required />
+            </label>
+            <label>Phone
+              <input name="phone" required />
+            </label>
+          </div>
+
+          <label>Street address
+            <input name="street_address" required />
+          </label>
+
+          <div class="form-row">
+            <label>City
+              <input name="city" required />
+            </label>
+            <label>State
+              <input name="state" maxlength="2" placeholder="TX" />
+            </label>
+            <label>Zip
+              <input name="zip" required />
+            </label>
+          </div>
+
+          <button id="signupBtn" class="btn btn-primary" type="submit">Join the list</button>
+          <p id="formMsg" class="form-msg"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <h3>Already signed up?</h3>
+        <p class="muted">Use the “manage/cancel” link in your confirmation email.</p>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 The Junkluggers. All rights reserved.</p>
+      <p class="muted"><a href="admin.html">Admin</a></p>
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

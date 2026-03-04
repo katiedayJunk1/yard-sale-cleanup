@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - The Junkluggers Deal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Admin</h1>
+      <p class="tagline">View signups • Export CSV • Update min/max</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h3>Admin key</h3>
+        <p class="muted">Paste your ADMIN_KEY (from Railway Variables). This is stored in your browser only.</p>
+        <div class="form-row">
+          <input id="adminKey" placeholder="ADMIN_KEY" style="flex:1" />
+          <button id="saveKey" class="btn btn-primary" type="button">Save</button>
+        </div>
+        <p id="keyMsg" class="form-msg"></p>
+      </section>
+
+      <section class="card">
+        <h3>Settings</h3>
+        <div class="form-row">
+          <label>Min required
+            <input id="minRequired" type="number" min="1" />
+          </label>
+          <label>Max allowed
+            <input id="maxAllowed" type="number" min="1" />
+          </label>
+          <button id="updateSettings" class="btn btn-primary" type="button">Update</button>
+        </div>
+        <p class="muted">Changing min/max here updates the current week instantly.</p>
+        <p id="settingsMsg" class="form-msg"></p>
+      </section>
+
+      <section class="card">
+        <div class="status-row" style="justify-content:space-between;align-items:center">
+          <h3 style="margin:0">Signups</h3>
+          <button id="exportCsv" class="btn" type="button">Export CSV</button>
+        </div>
+        <p id="adminStatus" class="muted">Loading…</p>
+        <div class="table-wrap">
+          <table class="table" id="signupTable">
+            <thead>
+              <tr>
+                <th>Created</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p class="muted"><a href="index.html">Back to the deal page</a></p>
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const API_BASE = (window.JUNKDEAL_API_BASE || '').replace(/\/$/, '');
+    const keyInput = document.getElementById('adminKey');
+    const saveKeyBtn = document.getElementById('saveKey');
+    const keyMsg = document.getElementById('keyMsg');
+    const adminStatus = document.getElementById('adminStatus');
+    const tbody = document.querySelector('#signupTable tbody');
+    const exportBtn = document.getElementById('exportCsv');
+
+    const minInput = document.getElementById('minRequired');
+    const maxInput = document.getElementById('maxAllowed');
+    const updateBtn = document.getElementById('updateSettings');
+    const settingsMsg = document.getElementById('settingsMsg');
+
+    function getKey() {
+      return localStorage.getItem('JUNKDEAL_ADMIN_KEY') || '';
+    }
+
+    function setKey(k) {
+      localStorage.setItem('JUNKDEAL_ADMIN_KEY', k);
+    }
+
+    function setMsg(el, text, ok=false) {
+      el.textContent = text;
+      el.className = ok ? 'form-msg ok' : 'form-msg';
+    }
+
+    keyInput.value = getKey();
+
+    saveKeyBtn.addEventListener('click', () => {
+      setKey(keyInput.value.trim());
+      setMsg(keyMsg, 'Saved ✅', true);
+      load();
+    });
+
+    async function api(path, options={}) {
+      const headers = Object.assign({}, options.headers || {}, { 'x-admin-key': getKey() });
+      const r = await fetch(`${API_BASE}${path}`, Object.assign({}, options, { headers }));
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(body.error || `Request failed (${r.status})`);
+      return body;
+    }
+
+    function row(s) {
+      const tr = document.createElement('tr');
+      const created = new Date(s.created_at).toLocaleString();
+      const name = `${s.first_name} ${s.last_name}`;
+      const addr = `${s.street_address}, ${s.city}${s.state ? ', ' + s.state : ''} ${s.zip}`;
+      tr.innerHTML = `
+        <td>${created}</td>
+        <td>${name}</td>
+        <td>${s.email}</td>
+        <td>${s.phone}</td>
+        <td>${addr}</td>
+        <td>${s.status}</td>
+      `;
+      return tr;
+    }
+
+    async function load() {
+      if (!API_BASE || API_BASE.includes('YOUR-BACKEND')) {
+        adminStatus.textContent = 'Set your backend URL in config.js first.';
+        return;
+      }
+
+      adminStatus.textContent = 'Loading…';
+      tbody.innerHTML = '';
+      try {
+        const data = await api('/api/admin/deal/current/signups');
+        adminStatus.textContent = `Week: ${data.week_start} • Status: ${data.deal_status} • Min: ${data.min_required} • Max: ${data.max_allowed} • Total: ${data.signups.length}`;
+
+        minInput.value = data.min_required;
+        maxInput.value = data.max_allowed;
+
+        data.signups.forEach(s => tbody.appendChild(row(s)));
+      } catch (e) {
+        adminStatus.textContent = e.message;
+      }
+    }
+
+    exportBtn.addEventListener('click', () => {
+      const url = `${API_BASE}/api/admin/deal/current/export.csv`;
+      // Trigger download with admin key via fetch -> blob
+      fetch(url, { headers: { 'x-admin-key': getKey() } })
+        .then(r => {
+          if (!r.ok) throw new Error('Export failed');
+          return r.blob();
+        })
+        .then(blob => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'signups.csv';
+          a.click();
+        })
+        .catch(err => alert(err.message));
+    });
+
+    updateBtn.addEventListener('click', async () => {
+      setMsg(settingsMsg, 'Updating…');
+      try {
+        const body = {
+          min_required: Number(minInput.value),
+          max_allowed: Number(maxInput.value),
+        };
+        const data = await api('/api/admin/deal/current/settings', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        setMsg(settingsMsg, `Updated ✅ Status: ${data.status} • Active: ${data.active_signups}`, true);
+        load();
+      } catch (e) {
+        setMsg(settingsMsg, e.message);
+      }
+    });
+
+    load();
+  </script>
+</body>
+</html>

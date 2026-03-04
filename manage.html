@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Signup - The Junkluggers</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>The Junkluggers</h1>
+      <p class="tagline">Manage your signup</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Cancel signup</h2>
+        <p class="muted">If you need to cancel your signup, click the button below.</p>
+
+        <button id="cancelBtn" class="btn btn-primary">Cancel my signup</button>
+        <p id="msg" class="form-msg"></p>
+
+        <p class="muted" style="margin-top:18px"><a href="index.html">Back to the deal page</a></p>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 The Junkluggers. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const API_BASE = (window.JUNKDEAL_API_BASE || '').replace(/\/$/, '');
+    const btn = document.getElementById('cancelBtn');
+    const msg = document.getElementById('msg');
+
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
+    function setMsg(text, ok=false) {
+      msg.textContent = text;
+      msg.className = ok ? 'form-msg ok' : 'form-msg';
+    }
+
+    if (!token) {
+      btn.disabled = true;
+      setMsg('Missing token. Please use the manage/cancel link from your email.');
+    }
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      setMsg('Canceling…');
+
+      try {
+        const r = await fetch(`${API_BASE}/api/deal/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+        const body = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(body.error || `Cancel failed (${r.status})`);
+        setMsg('Canceled ✅', true);
+      } catch (e) {
+        setMsg(e.message);
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
