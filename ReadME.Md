@@ -147,7 +147,7 @@ Using Gmail:
 ```bash
 cd backend
 npm run dev
-# Server runs on http://localhost:3000
+# Server runs on 
 ```
 
 **Frontend:**
