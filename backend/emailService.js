@@ -53,9 +53,11 @@ class EmailService {
             await this.transporter.verify();
             console.log('✅ Email service initialized');
             this.initialized = true;
-        } catch (error) {
+       } catch (error) {
             console.error('Email service initialization error:', error);
-            throw error;
+            console.warn('⚠️ Continuing without email (service not initialized).');
+            this.initialized = false;
+            return;
         }
     }
 
