@@ -6,4 +6,4 @@
 // Example:
 // window.JUNKDEAL_API_BASE = "https://yard-sale-cleanup-production.up.railway.app";
 
-window.JUNKDEAL_API_BASE = "https://YOUR-BACKEND.up.railway.app";
+window.JUNKDEAL_API_BASE = "https://katiedayJunk1.github.io/yard-sale-cleanup";
