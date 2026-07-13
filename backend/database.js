@@ -49,7 +49,7 @@ class Database {
             );
         `);
 
-        await this.query(`
+                await this.query(`
             CREATE TABLE IF NOT EXISTS signup (
                 id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
                 deal_week_id uuid NOT NULL REFERENCES deal_week(id) ON DELETE CASCADE,
@@ -66,6 +66,11 @@ class Database {
                 canceled_at timestamptz,
                 manage_token text NOT NULL UNIQUE
             );
+        `);
+
+        await this.query(`
+            ALTER TABLE signup
+            ADD COLUMN IF NOT EXISTS notes text;
         `);
 
         await this.query('CREATE INDEX IF NOT EXISTS idx_signup_week_status ON signup(deal_week_id, status);');
