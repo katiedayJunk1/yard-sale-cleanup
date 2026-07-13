@@ -107,7 +107,7 @@ el.signupForm.addEventListener('submit', async (e) => {
     const body = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(body.error || `Signup failed (${r.status})`);
 
-    setMsg('You are signed up! Check your email for your manage/cancel link.', true);
+    setMsg('You are on the list! Your pickup is not confirmed until the group minimum is reached and your invoice is paid. Check your email for your manage/cancel link.', true);
     el.signupForm.reset();
     await refresh();
   } catch (e2) {
