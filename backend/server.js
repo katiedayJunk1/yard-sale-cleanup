@@ -14,13 +14,17 @@ const app = express();
 
 const PORT = process.env.PORT || 5000;
 const TZ = process.env.TIMEZONE || 'America/Chicago';
-const DEAL_PRICE = Number(process.env.DEAL_PRICE || 50);
+const DEAL_PRICE = Number(process.env.DEAL_PRICE || 150);
 const DEFAULT_MIN = Number(process.env.DEFAULT_MIN_REQUIRED || 10);
 const DEFAULT_MAX = Number(process.env.DEFAULT_MAX_ALLOWED || 20);
 const FRONTEND_URL = process.env.FRONTEND_URL || '*';
 const PUBLIC_SITE_URL = process.env.PUBLIC_SITE_URL || process.env.FRONTEND_URL || '';
 const ADMIN_KEY = process.env.ADMIN_KEY || '';
 const COUPON_CODE = process.env.FAIL_COUPON_CODE || 'JUNK10';
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
+  .split(',')
+  .map((email) => email.trim())
+  .filter(Boolean);
 
 // Middleware
 app.use(express.json());
@@ -43,7 +47,7 @@ function getWeekStart(dt) {
 function windowForWeek(weekStart) {
   const signupOpenAt = weekStart.set({ hour: 8, minute: 0, second: 0, millisecond: 0 });
   const decisionCutoffAt = weekStart.plus({ days: 5 }).set({ hour: 21, minute: 0, second: 0, millisecond: 0 }); // Sat 9pm
-  const signupCloseAt = weekStart.plus({ days: 6 }).set({ hour: 21, minute: 0, second: 0, millisecond: 0 }); // Sun 9pm
+  const signupCloseAt = weekStart.plus({ days: 6 }).set({ hour: 17, minute: 0, second: 0, millisecond: 0 }); // Sun 5pm
 
   return { signupOpenAt, decisionCutoffAt, signupCloseAt };
 }
@@ -153,6 +157,60 @@ function buildManageUrl(token) {
   if (!PUBLIC_SITE_URL) return '';
   const base = PUBLIC_SITE_URL.replace(/\/$/, '');
   return `${base}/manage.html?token=${encodeURIComponent(token)}`;
+}
+
+async function sendAdminSignupNotification({ signup, deal, activeCount, weekLabel }) {
+  if (!ADMIN_EMAILS.length) return;
+
+  const name = `${signup.first_name} ${signup.last_name}`.trim();
+  const address = [
+    signup.street_address,
+    signup.city,
+    signup.state,
+    signup.zip,
+  ].filter(Boolean).join(', ');
+
+  const subject = `New Yard Sale Cleanup signup: ${name}`;
+
+  const text = [
+    'New Yard Sale Cleanup signup',
+    '',
+    `Name: ${name}`,
+    `Email: ${signup.email}`,
+    `Phone: ${signup.phone}`,
+    `Service address: ${address}`,
+    `Notes/items: ${signup.notes || 'None provided'}`,
+    '',
+    `Week: ${weekLabel}`,
+    `Current signup count: ${activeCount} / ${deal.max_allowed}`,
+    `Minimum needed: ${deal.min_required}`,
+    `Deal status: ${deal.status}`,
+    '',
+    'Next step: once the deal reaches 10 signups, enter/send invoices through Vonigo.',
+  ].join('\n');
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.4">
+      <h2>New Yard Sale Cleanup signup</h2>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${signup.email}</p>
+      <p><strong>Phone:</strong> ${signup.phone}</p>
+      <p><strong>Service address:</strong> ${address}</p>
+      <p><strong>Notes/items:</strong> ${signup.notes || 'None provided'}</p>
+      <hr />
+      <p><strong>Week:</strong> ${weekLabel}</p>
+      <p><strong>Current signup count:</strong> ${activeCount} / ${deal.max_allowed}</p>
+      <p><strong>Minimum needed:</strong> ${deal.min_required}</p>
+      <p><strong>Deal status:</strong> ${deal.status}</p>
+      <p>Next step: once the deal reaches 10 signups, enter/send invoices through Vonigo.</p>
+    </div>
+  `;
+
+  try {
+    await emailService.sendEmail(ADMIN_EMAILS.join(','), subject, text, html);
+  } catch (error) {
+    console.error('Admin signup notification failed:', error);
+  }
 }
 
 async function sendDealOnEmails(deal) {
@@ -299,7 +357,7 @@ app.post('/api/deal/signup', async (req, res, next) => {
     const weekStart = getWeekStart(now);
     const windows = windowForWeek(weekStart);
 
-    const { first_name, last_name, email, phone, street_address, city, state, zip } = req.body || {};
+    const { first_name, last_name, email, phone, street_address, city, state, zip, notes } = req.body || {};
 
     const missing = [];
     for (const [k, v] of Object.entries({ first_name, last_name, email, phone, street_address, city, zip })) {
@@ -329,20 +387,33 @@ app.post('/api/deal/signup', async (req, res, next) => {
 
     const manageToken = crypto.randomBytes(24).toString('hex');
 
+    const signupForNotification = {
+      first_name: String(first_name).trim(),
+      last_name: String(last_name).trim(),
+      email: String(email).trim(),
+      phone: String(phone).trim(),
+      street_address: String(street_address).trim(),
+      city: String(city).trim(),
+      state: state ? String(state).trim() : null,
+      zip: String(zip).trim(),
+      notes: notes ? String(notes).trim() : null,
+    };
+    
     await db.query(
       `INSERT INTO signup (
-        deal_week_id, first_name, last_name, email, phone, street_address, city, state, zip, manage_token
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+        deal_week_id, first_name, last_name, email, phone, street_address, city, state, zip, notes, manage_token
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
       [
         deal.id,
-        String(first_name).trim(),
-        String(last_name).trim(),
-        String(email).trim(),
-        String(phone).trim(),
-        String(street_address).trim(),
-        String(city).trim(),
-        state ? String(state).trim() : null,
-        String(zip).trim(),
+        signupForNotification.first_name,
+        signupForNotification.last_name,
+        signupForNotification.email,
+        signupForNotification.phone,
+        signupForNotification.street_address,
+        signupForNotification.city,
+        signupForNotification.state,
+        signupForNotification.zip,
+        signupForNotification.notes,
         manageToken,
       ]
     );
@@ -358,8 +429,16 @@ app.post('/api/deal/signup', async (req, res, next) => {
     });
     await emailService.sendEmail(String(email).trim(), t.subject, t.text, t.html);
 
-    // Recount and possibly trigger deal ON (only before Sat 9pm)
+    // Recount and notify admins
     const newCount = await getActiveSignupCount(deal.id);
+    await sendAdminSignupNotification({
+      signup: signupForNotification,
+      deal,
+      activeCount: newCount,
+      weekLabel: label,
+    });
+    
+    // Possibly trigger deal ON (only before Sat 9pm)
     if (deal.status !== 'ON' && now <= windows.decisionCutoffAt && newCount >= deal.min_required) {
       deal = await updateDealStatus(deal.id, 'ON', now.toISO());
       await sendDealOnEmails(deal);
@@ -410,7 +489,7 @@ app.get('/api/admin/deal/current/signups', requireAdmin, async (req, res, next) 
     const deal = await getOrCreateDealWeek(weekStart.toISODate());
 
     const r = await db.query(
-      `SELECT id, first_name, last_name, email, phone, street_address, city, state, zip, created_at, status
+      `SELECT id, first_name, last_name, email, phone, street_address, city, state, zip, notes, created_at, status
        FROM signup
        WHERE deal_week_id = $1
        ORDER BY created_at ASC`,
@@ -443,7 +522,7 @@ app.get('/api/admin/deal/current/export.csv', requireAdmin, async (req, res, nex
       [deal.id]
     );
 
-    const header = ['first_name','last_name','email','phone','street_address','city','state','zip','created_at','status'];
+    const header = ['first_name','last_name','email','phone','street_address','city','state','zip','notes','created_at','status'];
     const rows = r.rows.map(row => header.map(h => {
       const v = row[h] == null ? '' : String(row[h]);
       if (/[\",\n]/.test(v)) return `\"${v.replace(/\"/g,'\"\"')}\"`;
