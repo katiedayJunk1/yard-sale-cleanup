@@ -1,21 +1,41 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
 class EmailService {
   constructor() {
-    this.resend = null;
+    this.transporter = null;
     this.initialized = false;
   }
 
   async initialize() {
-    if (!process.env.RESEND_API_KEY) {
-      console.warn('⚠️ RESEND_API_KEY not set. Emails will be skipped.');
-      this.initialized = false;
-      return;
-    }
+    try {
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+        console.warn('⚠️ EMAIL_USER / EMAIL_PASSWORD not set. Emails will be skipped.');
+        this.initialized = false;
+        return;
+      }
 
-    this.resend = new Resend(process.env.RESEND_API_KEY);
-    this.initialized = true;
-    console.log('✅ Resend email service initialized');
+      this.transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASSWORD,
+        },
+        connectionTimeout: 30000,
+        greetingTimeout: 30000,
+        socketTimeout: 30000,
+      });
+
+      await this.transporter.verify();
+      console.log('✅ Gmail SMTP email service initialized');
+      this.initialized = true;
+    } catch (error) {
+      console.error('Email service initialization error:', error);
+      console.warn('⚠️ Continuing without email (service not initialized).');
+      this.initialized = false;
+    }
   }
 
   async sendEmail(to, subject, text, html) {
@@ -25,28 +45,24 @@ class EmailService {
     }
 
     const recipients = Array.isArray(to)
-      ? to
+      ? to.join(',')
       : String(to)
           .split(',')
           .map((email) => email.trim())
-          .filter(Boolean);
+          .filter(Boolean)
+          .join(',');
 
     try {
-      const result = await this.resend.emails.send({
-        from: process.env.EMAIL_FROM || 'The Junkluggers <onboarding@resend.dev>',
+      const info = await this.transporter.sendMail({
+        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
         to: recipients,
         subject,
         text,
         html,
       });
 
-      if (result.error) {
-        console.error('Resend email error:', result.error);
-        throw new Error(result.error.message || 'Resend email failed');
-      }
-
-      console.log('Email sent:', result.data?.id || result);
-      return result;
+      console.log('Email sent:', info.messageId);
+      return info;
     } catch (error) {
       console.error('Email sending error:', error);
       throw error;
