@@ -188,13 +188,20 @@ footer {
     margin-top: 12px;
 }
 
-.form input {
+.form input,
+.form textarea {
     width: 100%;
     margin-top: 6px;
     padding: 10px 12px;
     border-radius: 8px;
     border: 1px solid #d7dcff;
     font-size: 1em;
+    font-family: inherit;
+}
+
+.form textarea {
+    min-height: 100px;
+    resize: vertical;
 }
 
 .form-row {
