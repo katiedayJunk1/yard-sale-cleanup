@@ -515,7 +515,7 @@ app.get('/api/admin/deal/current/export.csv', requireAdmin, async (req, res, nex
     const deal = await getOrCreateDealWeek(weekStart.toISODate());
 
     const r = await db.query(
-      `SELECT first_name, last_name, email, phone, street_address, city, state, zip, created_at, status
+      `SELECT first_name, last_name, email, phone, street_address, city, state, zip, notes, created_at, status
        FROM signup
        WHERE deal_week_id = $1
        ORDER BY created_at ASC`,
