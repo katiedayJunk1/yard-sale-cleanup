@@ -46,7 +46,7 @@ function getWeekStart(dt) {
 
 function windowForWeek(weekStart) {
   const signupOpenAt = weekStart.set({ hour: 8, minute: 0, second: 0, millisecond: 0 });
-  const decisionCutoffAt = weekStart.plus({ days: 6 }).set({ hour: 17, minute: 0, second: 0, millisecond: 0 }); // TEMP TEST: Sun 5pm
+  const decisionCutoffAt = weekStart.plus({ days: 5 }).set({ hour: 21, minute: 0, second: 0, millisecond: 0 }); // Sat 9pm
   const signupCloseAt = weekStart.plus({ days: 6 }).set({ hour: 17, minute: 0, second: 0, millisecond: 0 }); // Sun 5pm
 
   return { signupOpenAt, decisionCutoffAt, signupCloseAt };
