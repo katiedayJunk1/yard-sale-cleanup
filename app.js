@@ -58,8 +58,8 @@ function renderDeal(d) {
     el.statusText.textContent = `We need ${Math.max(0, minReq - active)} more signups for the deal to go live.`;
     el.progressNumbers.textContent = `${active} / ${minReq} to turn deal ON (max ${maxAllowed})`;
   } else if (d.status === 'FAILED') {
-    el.statusText.textContent = `Deal did not reach the minimum this week.`;
-    el.progressNumbers.textContent = `${active} / ${minReq} (minimum not reached)`;
+    el.statusText.textContent = `This week’s deal did not reach the ${minReq}-signup minimum by Saturday at 9:00 PM, so signups are now closed.`;
+    el.progressNumbers.textContent = `${active} / ${minReq} by the Saturday deadline`;
   } else if (d.status === 'CLOSED') {
     el.statusText.textContent = `Signups are closed for this week.`;
     el.progressNumbers.textContent = `${active} signups recorded`;
@@ -71,7 +71,7 @@ function renderDeal(d) {
     el.signupHelp.textContent = 'Signups are open.';
     el.signupBtn.disabled = false;
   } else if (!d.can_signup) {
-    el.signupHelp.textContent = 'Signups are not open right now.';
+    el.signupHelp.textContent = 'This week’s deal is closed because the Saturday 9:00 PM minimum signup deadline has passed.';
     el.signupBtn.disabled = true;
   } else {
     el.signupHelp.textContent = 'This week is full (max signups reached).';
