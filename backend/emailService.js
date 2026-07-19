@@ -29,18 +29,19 @@ class EmailService {
       });
 
       await this.transporter.verify();
+
       console.log('✅ Gmail SMTP email service initialized');
       this.initialized = true;
     } catch (error) {
       console.error('Email service initialization error:', error);
-      console.warn('⚠️ Continuing without email (service not initialized).');
+      console.warn('⚠️ Continuing without email.');
       this.initialized = false;
     }
   }
 
   async sendEmail(to, subject, text, html) {
     if (!this.initialized) {
-      console.warn(`⚠️ Email skipped (service not initialized). To: ${to} Subject: ${subject}`);
+      console.warn(`⚠️ Email skipped. To: ${to} Subject: ${subject}`);
       return { skipped: true };
     }
 
