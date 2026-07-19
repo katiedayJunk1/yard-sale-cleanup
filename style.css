@@ -52,6 +52,14 @@ header .tagline {
     color: var(--jl-muted);
 }
 
+.site-logo {
+    display: block;
+    max-width: 420px;
+    width: 100%;
+    height: auto;
+    margin: 0 auto 14px;
+}
+
 main {
     background: var(--jl-white);
     border-radius: 18px;
