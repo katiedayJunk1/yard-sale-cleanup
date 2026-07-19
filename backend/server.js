@@ -74,39 +74,6 @@ async function getOrCreateDealWeek(weekStartDateISO) {
   return created.rows[0];
 }
 
-async function getAdminDealWeek(weekStartDateISO, createIfMissing = false) {
-  const existing = await db.query('SELECT * FROM deal_week WHERE week_start = $1', [weekStartDateISO]);
-  if (existing.rows.length) return existing.rows[0];
-
-  if (createIfMissing) {
-    return getOrCreateDealWeek(weekStartDateISO);
-  }
-
-  return {
-    id: null,
-    week_start: weekStartDateISO,
-    min_required: DEFAULT_MIN,
-    max_allowed: DEFAULT_MAX,
-    status: 'NO RECORD',
-  };
-}
-
-function adminWeekStartFromQuery(req) {
-  const raw = req.query.week_start;
-
-  if (!raw) {
-    return getWeekStart(nowCT());
-  }
-
-  const dt = DateTime.fromISO(raw, { zone: TZ });
-
-  if (!dt.isValid) {
-    return null;
-  }
-
-  return getWeekStart(dt);
-}
-
 async function getActiveSignupCount(dealWeekId) {
   const r = await db.query('SELECT COUNT(*)::int AS c FROM signup WHERE deal_week_id = $1 AND status = $2', [dealWeekId, 'ACTIVE']);
   return r.rows[0].c;
@@ -517,41 +484,6 @@ app.post('/api/deal/cancel', async (req, res, next) => {
 // --- admin ---
 app.get('/api/admin/deal/current/signups', requireAdmin, async (req, res, next) => {
   try {
-    const weekStart = adminWeekStartFromQuery(req);
-
-    if (!weekStart) {
-      return res.status(400).json({ error: 'Invalid week_start. Use YYYY-MM-DD.' });
-    }
-
-    const createIfMissing = !req.query.week_start;
-    const deal = await getAdminDealWeek(weekStart.toISODate(), createIfMissing);
-
-    let signups = [];
-
-    if (deal.id) {
-      const r = await db.query(
-        `SELECT id, first_name, last_name, email, phone, street_address, city, state, zip, notes, created_at, status
-         FROM signup
-         WHERE deal_week_id = $1
-         ORDER BY created_at ASC`,
-        [deal.id]
-      );
-
-      signups = r.rows;
-    }
-
-    res.json({
-      week_start: deal.week_start,
-      deal_status: deal.status,
-      min_required: deal.min_required,
-      max_allowed: deal.max_allowed,
-      signups,
-    });
-  } catch (e) {
-    next(e);
-  }
-});
-  try {
     const now = nowCT();
     const weekStart = getWeekStart(now);
     const deal = await getOrCreateDealWeek(weekStart.toISODate());
@@ -577,46 +509,6 @@ app.get('/api/admin/deal/current/signups', requireAdmin, async (req, res, next) 
 });
 
 app.get('/api/admin/deal/current/export.csv', requireAdmin, async (req, res, next) => {
-  try {
-    const weekStart = adminWeekStartFromQuery(req);
-
-    if (!weekStart) {
-      return res.status(400).json({ error: 'Invalid week_start. Use YYYY-MM-DD.' });
-    }
-
-    const createIfMissing = !req.query.week_start;
-    const deal = await getAdminDealWeek(weekStart.toISODate(), createIfMissing);
-
-    let signupRows = [];
-
-    if (deal.id) {
-      const r = await db.query(
-        `SELECT first_name, last_name, email, phone, street_address, city, state, zip, notes, created_at, status
-         FROM signup
-         WHERE deal_week_id = $1
-         ORDER BY created_at ASC`,
-        [deal.id]
-      );
-
-      signupRows = r.rows;
-    }
-
-    const header = ['first_name','last_name','email','phone','street_address','city','state','zip','notes','created_at','status'];
-    const rows = signupRows.map(row => header.map(h => {
-      const v = row[h] == null ? '' : String(row[h]);
-      if (/[\",\n]/.test(v)) return `\"${v.replace(/\"/g,'\"\"')}\"`;
-      return v;
-    }).join(','));
-
-    const csv = [header.join(','), ...rows].join('\n');
-
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename=signups-${weekStart.toISODate()}.csv`);
-    res.send(csv);
-  } catch (e) {
-    next(e);
-  }
-});
   try {
     const now = nowCT();
     const weekStart = getWeekStart(now);
