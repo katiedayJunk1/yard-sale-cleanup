@@ -44,6 +44,16 @@
           <h3 style="margin:0">Signups</h3>
           <button id="exportCsv" class="btn" type="button">Export CSV</button>
         </div>
+        
+        <div class="form-row" style="margin-top:12px">
+          <label>View week
+            <input id="weekFilter" type="date" />
+          </label>
+          <button id="loadWeek" class="btn btn-primary" type="button">Load Week</button>
+          <button id="currentWeek" class="btn" type="button">Current Week</button>
+        </div>
+        
+        <p class="muted">Choose any date in the week you want to view. The system will load that Monday-Sunday signup period.</p>
         <p id="adminStatus" class="muted">Loading…</p>
         <div class="table-wrap">
           <table class="table" id="signupTable">
@@ -78,11 +88,17 @@
     const adminStatus = document.getElementById('adminStatus');
     const tbody = document.querySelector('#signupTable tbody');
     const exportBtn = document.getElementById('exportCsv');
-
+    const weekFilter = document.getElementById('weekFilter');
+    const loadWeekBtn = document.getElementById('loadWeek');
+    const currentWeekBtn = document.getElementById('currentWeek');
     const minInput = document.getElementById('minRequired');
     const maxInput = document.getElementById('maxAllowed');
     const updateBtn = document.getElementById('updateSettings');
     const settingsMsg = document.getElementById('settingsMsg');
+
+    function weekQuery() {
+      return weekFilter.value ? `?week_start=${encodeURIComponent(weekFilter.value)}` : '';
+    }
 
     function getKey() {
       return localStorage.getItem('JUNKDEAL_ADMIN_KEY') || '';
@@ -139,11 +155,13 @@
       adminStatus.textContent = 'Loading…';
       tbody.innerHTML = '';
       try {
-        const data = await api('/api/admin/deal/current/signups');
+        const data = await api(`/api/admin/deal/current/signups${weekQuery()}`);
         adminStatus.textContent = `Week: ${data.week_start} • Status: ${data.deal_status} • Min: ${data.min_required} • Max: ${data.max_allowed} • Total: ${data.signups.length}`;
 
-        minInput.value = data.min_required;
-        maxInput.value = data.max_allowed;
+        if (!weekFilter.value) {
+          minInput.value = data.min_required;
+          maxInput.value = data.max_allowed;
+        }
 
         data.signups.forEach(s => tbody.appendChild(row(s)));
       } catch (e) {
@@ -152,7 +170,7 @@
     }
 
     exportBtn.addEventListener('click', () => {
-      const url = `${API_BASE}/api/admin/deal/current/export.csv`;
+      const url = `${API_BASE}/api/admin/deal/current/export.csv${weekQuery()}`;
       // Trigger download with admin key via fetch -> blob
       fetch(url, { headers: { 'x-admin-key': getKey() } })
         .then(r => {
@@ -186,7 +204,14 @@
         setMsg(settingsMsg, e.message);
       }
     });
-
+    loadWeekBtn.addEventListener('click', () => {
+      load();
+    });
+    
+    currentWeekBtn.addEventListener('click', () => {
+      weekFilter.value = '';
+      load();
+    });
     load();
   </script>
 </body>
