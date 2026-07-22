@@ -65,7 +65,7 @@ function renderDeal(d) {
     el.progressNumbers.textContent = `${active} signups recorded`;
   }
 
-  el.deadlines.textContent = `Cutoff: ${d.display.decision_cutoff_at} • Signups close: ${d.display.signup_close_at}`;
+  el.deadlines.textContent = `Minimum deadline: ${d.display.decision_cutoff_at} • Final signup close if deal is ON: ${d.display.signup_close_at}`;
 
   if (d.can_signup && spotsLeft > 0) {
     el.signupHelp.textContent = 'Signups are open.';
