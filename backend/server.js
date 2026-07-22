@@ -186,7 +186,7 @@ async function sendAdminSignupNotification({ signup, deal, activeCount, weekLabe
     `Minimum needed: ${deal.min_required}`,
     `Deal status: ${deal.status}`,
     '',
-    'Next step: once the deal reaches 10 signups, enter/send invoices through Vonigo.',
+    'Next step: once the deal reaches 10 signups, enter/send invoices through Vonigo and schedule approved pickups for Tuesday.',
   ].join('\n');
 
   const html = `
@@ -202,7 +202,7 @@ async function sendAdminSignupNotification({ signup, deal, activeCount, weekLabe
       <p><strong>Current signup count:</strong> ${activeCount} / ${deal.max_allowed}</p>
       <p><strong>Minimum needed:</strong> ${deal.min_required}</p>
       <p><strong>Deal status:</strong> ${deal.status}</p>
-      <p>Next step: once the deal reaches 10 signups, enter/send invoices through Vonigo.</p>
+      <p>Next step: once the deal reaches 10 signups, enter/send invoices through Vonigo and schedule approved pickups for Tuesday.</p>
     </div>
   `;
 
