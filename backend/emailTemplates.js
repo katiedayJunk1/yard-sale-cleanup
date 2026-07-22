@@ -16,7 +16,7 @@ function signupConfirmation({ firstName, minRequired, price, manageUrl, weekLabe
     `Manage/cancel: ${manageUrl}`,
     '',
     'Rules (quick summary):',
-    '- Pickup happens next Monday between 8:00am–6:00pm',
+    '- Pickup happens next Tuesday between 8:00am–6:00pm',
     '- Items must be curb-ready, bundled/boxed/bagged',
     '- Trash must be clearly labeled',
     '- Everything assumed donatable unless labeled trash',
@@ -38,7 +38,7 @@ function signupConfirmation({ firstName, minRequired, price, manageUrl, weekLabe
       <hr />
       <p><strong>Rules (quick summary):</strong></p>
       <ul>
-        <li>Pickup happens next Monday between <strong>8:00am–6:00pm</strong></li>
+        <li>Pickup happens next Tuesday between <strong>8:00am–6:00pm</strong></li>
         <li>Small items must be curb-ready, bundled/boxed/bagged</li>
         <li>Trash must be clearly labeled</li>
         <li>Everything assumed donatable unless labeled trash</li>
@@ -63,7 +63,7 @@ function dealIsOn({ firstName, price, weekLabel, manageUrl }) {
     '',
     `Manage/cancel: ${manageUrl}`,
     '',
-    'We’ll see you next Monday between 8:00am–6:00pm.',
+    'We’ll see you next Tuesday between 8:00am–6:00pm.',
     'The Junkluggers'
   ].join('\n');
 
@@ -72,7 +72,7 @@ function dealIsOn({ firstName, price, weekLabel, manageUrl }) {
       <h2>Deal is ON 🎉</h2>
       <p>Hi <strong>${firstName}</strong>,</p>
       <p>Good news — the deal is ON for ${weekLabel}. Your pickup will be <strong>${formatMoney(price)}</strong>.</p>
-      <p>Pickup happens next Monday between <strong>8:00am–6:00pm</strong>.</p>
+      <p>Pickup happens next Tuesday between <strong>8:00am–6:00pm</strong>.</p>
       <p><a href="${manageUrl}">Manage or cancel your signup</a></p>
       <p>— The Junkluggers</p>
     </div>
@@ -138,7 +138,7 @@ function dealFailed({ firstName, weekLabel, couponCode }) {
     '',
     `We didn't reach enough signups for the ${weekLabel} deal, so it won't run this week.`,
     '',
-    `If you'd like a regular pickup on Monday, use coupon code ${couponCode} for 10% off.`,
+    `If you'd like a regular pickup on Tuesday, use coupon code ${couponCode} for 10% off.`,
     '',
     '— The Junkluggers'
   ].join('\n');
@@ -148,7 +148,7 @@ function dealFailed({ firstName, weekLabel, couponCode }) {
       <h2>Deal didn't reach the minimum</h2>
       <p>Hi <strong>${firstName}</strong>,</p>
       <p>We didn't reach enough signups for the ${weekLabel} deal, so it won't run this week.</p>
-      <p>If you'd like a regular pickup on Monday, use coupon code <strong>${couponCode}</strong> for <strong>10% off</strong>.</p>
+      <p>If you'd like a regular pickup on Tuesday, use coupon code <strong>${couponCode}</strong> for <strong>10% off</strong>.</p>
       <p>— The Junkluggers</p>
     </div>
   `;
